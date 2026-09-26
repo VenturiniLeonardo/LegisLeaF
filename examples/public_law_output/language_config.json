@@ -1,0 +1,407 @@
+{
+  "schema_version": 1,
+  "code": "en",
+  "name": "inglese",
+  "english_name": "English",
+  "source": "baseline:language_en.json",
+  "_commento": [
+    "Baseline per i testi normativi in lingua inglese. Nasce dal confronto fra i profili",
+    "che f0 generava con l'LLM, uno per documento: tre su cinque cercavano la parola",
+    "'Article', che in uno statuto britannico, irlandese o statunitense non compare mai,",
+    "e l'estrazione degli articoli crollava a 9, 1 e 0 nodi contro 549, 232 e 8 del golden.",
+    "",
+    "Due scelte determinano tutto il resto.",
+    "",
+    "1) 'article' e' l'UNITA' NORMATIVA FOGLIA, qualunque nome porti nella fonte:",
+    "   'Section 5' (UK, Irlanda, Canada), '§ 164.102' (CFR statunitense), 'Article 12'",
+    "   (atti UE in inglese). E' la stessa mappatura per funzione usata dal lato golden:",
+    "   tenerle diverse renderebbe i due alberi non confrontabili per una convenzione di",
+    "   denominazione. Di conseguenza 'section' NON puo' essere anche il nome di un",
+    "   livello contenitore, o le due etichette si contenderebbero le stesse righe",
+    "   (infer_structural_label prova article prima di section, e article vincerebbe",
+    "   sempre: e' cio' che produceva 91 article contro 39 nel CFR).",
+    "",
+    "2) 'section' e' quindi il livello contenitore che nel diritto federale statunitense",
+    "   sta fra Part e Section: Subpart / Subchapter / Subdivision. Il prefisso 'Sub'",
+    "   rende impossibile la collisione con 'Section N'.",
+    "",
+    "Nota su header_patterns.recital: NON riconosce il '(N)' nudo. Nel common law quello",
+    "e' il marcatore standard di sottosezione, e riconoscerlo come considerando faceva",
+    "diventare recital 79 nodi su 133 in un atto irlandese e 32 su 34 in una public law.",
+    "Il '(N)' nudo resta in patterns.recital_item, che f2 usa solo dentro la macchina a",
+    "stati del preambolo: cosi' gli atti UE in inglese conservano i loro considerando",
+    "veri (introdotti da 'Whereas:') senza che le sottosezioni ne diventino uno.",
+    "",
+    "Limite noto: le lettere dei Subpart ('Subpart A') non passano da normalize_number,",
+    "che accetta solo numeri romani o arabi: quei nodi restano senza 'numero'. Allargare",
+    "roman_or_arabic alle lettere nude avrebbe reso piu' lasco ogni altro pattern."
+  ],
+  "quotes": "“”‘’\"",
+  "article_rubric_max_chars": 160,
+  "numbering": {
+    "_commento": "Il suffisso letterale ('section 12A', 'section 12ZA') e' la forma con cui il common law inserisce articoli nuovi: sta DENTRO il numero, non in ordinal_suffixes, altrimenti normalize_number lo scarterebbe e 12 e 12A finirebbero nello stesso nodo.",
+    "roman_or_arabic": "(?:[IVXLCDM]+(?:\\.\\d+)?|\\d+[A-Z]{0,3}(?:\\.\\d+)?)",
+    "article_number": "\\d+[A-Z]{0,3}(?:\\.\\d+)?",
+    "word_numerals": [
+      "ONE",
+      "TWO",
+      "THREE",
+      "FOUR",
+      "FIVE",
+      "SIX",
+      "SEVEN",
+      "EIGHT",
+      "NINE",
+      "TEN"
+    ]
+  },
+  "ordinal_suffixes": [],
+  "suffix_aliases": {},
+  "akn_patterns": [
+    {
+      "etichetta": "part",
+      "pattern": "PART\\s+{part_number}",
+      "priorita": 1
+    },
+    {
+      "etichetta": "annex",
+      "pattern": "(?:SCHEDULE|ANNEX|APPENDIX)\\s+(?:{num}|[A-Z]{1,3})",
+      "priorita": 1
+    },
+    {
+      "etichetta": "title",
+      "pattern": "TITLE\\s+{num}",
+      "priorita": 2
+    },
+    {
+      "etichetta": "chapter",
+      "pattern": "CHAPTER\\s+{num}",
+      "priorita": 3
+    },
+    {
+      "etichetta": "section",
+      "pattern": "SUB(?:PART|CHAPTER|DIVISION)\\s+(?:[A-Z]{1,3}|{num})",
+      "priorita": 4
+    },
+    {
+      "etichetta": "article",
+      "pattern": "(?:§|Sec\\.?|Section|Art\\.?|Article)\\s*{article_num}",
+      "priorita": 5
+    }
+  ],
+  "akn_document_types": [
+    {
+      "_commento": "US Public Law: 'Public Law 116-207'. Prima delle regole generiche su 'Act'.",
+      "pattern": "\\bpublic\\s+law\\s+(?:no\\.?\\s*)?(?P<number>\\d{1,3}\\s*[-–—]\\s*\\d{1,4})",
+      "subtype": "public-law",
+      "country": "us",
+      "author_show_as": "Congress of the United States",
+      "author_href": "/akn/ontology/organization/us.congress"
+    },
+    {
+      "pattern": "\\bexecutive\\s+order\\s+(?:no\\.?\\s*)?(?P<number>\\d{4,5})",
+      "subtype": "executive-order",
+      "country": "us",
+      "author_show_as": "President of the United States",
+      "author_href": "/akn/ontology/organization/us.president"
+    },
+    {
+      "_commento": "Code of Federal Regulations: '45 CFR Part 164'.",
+      "pattern": "\\b(?P<number>\\d{1,2})\\s+cfr\\b|\\bcode\\s+of\\s+federal\\s+regulations\\b",
+      "subtype": "cfr",
+      "country": "us",
+      "author_show_as": "United States federal agency",
+      "author_href": "/akn/ontology/organization/us.federal-agency"
+    },
+    {
+      "_commento": "Irish Statute Book: 'Number 7 of 2018'. Distingue l'Irlanda dal Regno Unito, che usa la stessa formula 'Act <anno>'.",
+      "pattern": "\\bnumber\\s+(?P<number>\\d{1,3})\\s+of\\s+\\d{4}\\b|\\boireachtas\\b",
+      "subtype": "act",
+      "country": "ie",
+      "author_show_as": "Houses of the Oireachtas",
+      "author_href": "/akn/ontology/organization/ie.oireachtas"
+    },
+    {
+      "pattern": "\\bstatutes\\s+of\\s+canada\\b|\\bs\\.c\\.\\s*(?P<number>\\d{4})\\b|\\brevised\\s+statutes\\s+of\\s+canada\\b",
+      "subtype": "act",
+      "country": "ca",
+      "author_show_as": "Parliament of Canada",
+      "author_href": "/akn/ontology/organization/ca.parliament"
+    },
+    {
+      "pattern": "\\bregulation\\s*\\(\\s*(?:eu|ec|euratom)[^)]*\\)\\s*(?:no\\.?\\s*)?(?P<number>\\d{1,4}/\\d{1,5})",
+      "subtype": "regulation",
+      "country": "eu",
+      "author_show_as": "European Parliament and Council of the European Union",
+      "author_href": "/akn/ontology/organization/eu.europarl-consilium"
+    },
+    {
+      "pattern": "\\bdirective\\s*(?:\\(\\s*(?:eu|ec|euratom)[^)]*\\)\\s*)?(?:no\\.?\\s*)?(?P<number>\\d{1,4}/\\d{1,5})",
+      "subtype": "directive",
+      "country": "eu",
+      "author_show_as": "European Parliament and Council of the European Union",
+      "author_href": "/akn/ontology/organization/eu.europarl-consilium"
+    },
+    {
+      "pattern": "\\bstatutory\\s+instrument[s]?\\s+(?P<number>\\d{4}/\\d{1,5})\\b",
+      "subtype": "statutory-instrument",
+      "country": "uk",
+      "author_show_as": "Parliament of the United Kingdom",
+      "author_href": "/akn/ontology/organization/gb.parliament"
+    },
+    {
+      "_commento": "Ultima fra le regole sugli Act: 'Data Protection Act 2018' senza altri indizi e' britannico.",
+      "pattern": "\\bact\\s+(?P<number>(?:19|20)\\d{2})\\b",
+      "subtype": "act",
+      "country": "uk",
+      "author_show_as": "Parliament of the United Kingdom",
+      "author_href": "/akn/ontology/organization/gb.parliament"
+    },
+    {
+      "pattern": "^\\s*(?:code\\b|consolidated\\s+text\\b|revised\\s+statutes\\b)",
+      "subtype": "code",
+      "country": "us"
+    }
+  ],
+  "header_patterns": {
+    "part": "^Part\\s+({part_number}){opt_suffix}\\b",
+    "title": "^Title\\s+({num}){opt_suffix}\\b",
+    "chapter": "^Chapter\\s+({num}){opt_suffix}\\b",
+    "section": "^Sub(?:part|chapter|division)\\s+([A-Z]{1,3}|{num}){opt_suffix}\\b",
+    "annex": "^(?:Schedule|Annex|Appendix)\\s+({num}|[A-Z]{1,3}){opt_suffix}(?:\\b|[.\\s(]).*$",
+    "article": "^(?:(?:§|Sec\\.?|Section|Art\\.?|Article)\\s*({article_num}){opt_suffix}(?:\\b|[.,])(?:\\s+(?P<rubrica>[^\\n]{1,{rubric_max}}))?|({article_num})\\.?\\s+(?!(?:STAT|U\\.?S\\.?C|CFR|Pub\\.?\\s*L|Stat)\\b)(?P<rubrica_nuda>(?-i:[A-Z])[^\\n]{2,{rubric_max}}))$",
+    "recital": "^whereas\\b(?:\\s*[:,]?\\s*\\(?\\d+\\)?)?.+"
+  },
+  "patterns": {
+    "article_components": "^(?P<prefix>§|Sec\\.?|Section|Art\\.?|Article)?\\s*(?P<number>{article_num})(?:\\s*{dash}?\\s*(?P<suffix>(?:{suffix})(?:[\\s-]+(?:{suffix}))?))?(?:[.,])?\\s*(?P<rubrica>.*)$",
+    "structural_marker": "[{quotes}]?\\b(?:Part|Title|Chapter|Sub(?:part|chapter|division)|Schedule|Annex|Appendix)\\s+{num}|[{quotes}]?\\b(?:§|Sec\\.?|Section|Art\\.?|Article)\\s*\\d+[A-Z]{0,3}",
+    "modificative_instruction": "\\b(?:is|are|shall\\s+be)\\s+(?:hereby\\s+)?(?:inserted|added|substituted|repealed|omitted|amended)\\b.*\\b(?:section|chapter|part|schedule|article|subsection)\\b",
+    "editorial_structural_note": "^\\(\\d+\\)\\s+(?:Section|Sec\\.?|Schedule|Chapter|Part|Article)\\s+\\S+\\s+(?:was|is|has\\s+been)\\s+(?:repealed|substituted|inserted|amended|omitted)",
+    "paragraph_marker": "\\(\\d+[A-Z]{0,2}\\)\\s+",
+    "point_marker": "\\((?:[a-z]{1,3}|[ivxl]{1,6})\\)\\s+",
+    "page_number_noise": "\\d{1,4}|(?:Page|p\\.)\\s*\\d{1,4}",
+    "recital_item": "^\\((\\d+)\\)\\s+\\S",
+    "recital_number": "^(?:whereas\\s+\\(?(\\d+)\\)?|\\((\\d+)\\)\\s+)",
+    "recital_path_segment": "^\\((\\d+)\\)",
+    "recital_section_start": "^whereas\\s*:?\\s*$|^whereas\\s+the\\s+following",
+    "device_start": "^(?:have\\s+adopted\\s+this|has\\s+adopted\\s+this|be\\s+it\\s+enacted|now,?\\s+therefore|§|Sec\\.?\\s+\\d|Section\\s+\\d|Art(?:icle|\\.)\\s+\\d)\\b",
+    "preamble_marker": "^(?:having\\s+regard\\s+to|whereas|acting\\s+in\\s+accordance|by\\s+the\\s+authority\\s+vested|be\\s+it\\s+enacted)\\b",
+    "annex_local_part": "^Part\\s+\\d+\\s*:?$",
+    "footnote_citation_markers": "\\b(?:OJ|Official\\s+Journal|Stat\\.|U\\.S\\.C\\.|c\\.\\s*\\d|p\\.|regulation|directive|decision|opinion)\\b",
+    "article_body_opening": "^(?P<number>{article_num})\\s*[.—-]?\\s*(?=\\(\\d|(?-i:[A-Z]))"
+  },
+  "label_descriptions": {
+    "part": "partizione alta del testo, per esempio Part 1 oppure PART I",
+    "annex": "allegato del documento, per esempio Schedule 1, Annex II o Appendix A",
+    "title": "partizione Akoma Ntoso title, per esempio Title 45",
+    "chapter": "partizione Akoma Ntoso chapter, per esempio Chapter 2",
+    "section": "partizione Akoma Ntoso section: nel common law e' il livello Subpart/Subchapter, NON la 'Section' numerata (quella e' un article)",
+    "recital": "considerando del preambolo di un atto UE in inglese, introdotto da Whereas",
+    "article": "unita' normativa foglia: Section 5, Sec. 5, § 164.102, Article 12",
+    "paragraph": "sottosezione numerata dentro l'unita' foglia, per esempio (1) oppure (2)",
+    "point": "lettera o punto di elenco, per esempio (a), (b), (i)",
+    "content": "testo normativo ordinario non riconosciuto come struttura o lista",
+    "unresolved": "blocco non classificato in modo affidabile; non deve generare struttura",
+    "noise": "testo editoriale, numeri pagina, intestazioni OCR, elementi non normativi"
+  },
+  "label_examples": {
+    "part": [
+      "Part 1",
+      "PART I",
+      "Part 5"
+    ],
+    "annex": [
+      "Schedule 1",
+      "Annex II",
+      "Appendix A"
+    ],
+    "title": [
+      "Title 45",
+      "TITLE II"
+    ],
+    "chapter": [
+      "Chapter 2",
+      "CHAPTER IV"
+    ],
+    "section": [
+      "Subpart A",
+      "Subchapter II",
+      "Subpart E"
+    ],
+    "recital": [
+      "Whereas:",
+      "Whereas the following applies"
+    ],
+    "article": [
+      "Section 5",
+      "Sec. 12",
+      "§ 164.102",
+      "Article 12",
+      "Section 12A Overview"
+    ],
+    "paragraph": [
+      "(1)",
+      "(2)",
+      "(3A)"
+    ],
+    "point": [
+      "(a)",
+      "(b)",
+      "(i)"
+    ],
+    "content": [],
+    "noise": []
+  },
+  "prompt_terms": {
+    "hierarchy_glosses": {
+      "part": "partizione alta, per esempio Part 1",
+      "annex": "allegato, per esempio Schedule 1 o Annex II",
+      "title": "titolo normativo, per esempio Title 45",
+      "chapter": "capitolo, per esempio Chapter 2",
+      "section": "livello Subpart/Subchapter: NON la Section numerata, che e' un article",
+      "article": "unita' normativa foglia, anche quando include la rubrica dopo il numero"
+    },
+    "modificative_examples": [
+      "is hereby amended by inserting the following section",
+      "shall be substituted for section 12",
+      "is repealed"
+    ],
+    "article_citation_examples": [
+      "(1) In section 12 of the Data Protection Act 2018...",
+      "as provided in § 164.308(a)(1)"
+    ],
+    "forbidden_label_synonyms": [
+      "subsection",
+      "subpart",
+      "subchapter",
+      "clause",
+      "schedule",
+      "heading",
+      "plain_text",
+      "noise_text"
+    ]
+  },
+  "display": {
+    "recital_prefix": "Recital",
+    "path_prefix": "Path"
+  },
+  "smoke_queries": {
+    "graph_search": "Section 1",
+    "vector_search": "personal data"
+  },
+  "detection_hints": {
+    "stopwords": [
+      "the",
+      "of",
+      "and",
+      "to",
+      "in",
+      "for",
+      "that",
+      "is",
+      "are",
+      "by",
+      "with",
+      "any",
+      "such",
+      "shall",
+      "may",
+      "not",
+      "this",
+      "under",
+      "section",
+      "subsection",
+      "provisions",
+      "purposes",
+      "accordance"
+    ]
+  },
+  "structure_conventions": {
+    "_commento": [
+      "Convenzioni della redazione di common law (UK, Irlanda, Canada, USA).",
+      "",
+      "article_rubric_position='before' e' la differenza che conta rispetto",
+      "all'italiano: la rubrica di una sezione e' una riga SEPARATA SOPRA il testo",
+      "numerato, non sulla stessa riga del numero.",
+      "",
+      "    Superannuation of Commissioners      <- blocco rubrica, senza numero",
+      "    22. (1) The Commission shall...      <- blocco numerato, apre il corpo",
+      "",
+      "Senza questa dichiarazione f2 vedeva due blocchi separati e poteva",
+      "riconoscere solo il secondo: 221 rubriche su 232 sezioni finivano etichettate",
+      "'content'. Misurato su data_protection: 136 coppie rubrica+numero presenti,",
+      "e in 135 casi su 136 il numero coincide con quello del golden.",
+      "",
+      "rubric_block_types elenca i tipi che l'estrattore assegna a una rubrica:",
+      "su questo corpus sono 'heading' (91 casi) e 'paragraph_title' (102)."
+    ],
+    "article_rubric_position": "before",
+    "article_rubric_max_words": 24,
+    "rubric_block_types": [
+      "heading",
+      "paragraph_title",
+      "section_header",
+      "doc_title"
+    ],
+    "rubric_lookahead_blocks": 3,
+    "contents_page_min_headings": 5,
+    "contents_page_min_ratio": 0.5,
+    "running_header_max_page_order": 2,
+    "running_header_min_pages": 3,
+    "recital_sequence_tolerance": 3,
+    "_commento_foreign_text": [
+      "Alcune fonti in inglese pubblicano ogni disposizione anche in un'altra",
+      "lingua ufficiale (es. le leggi federali canadesi, bilingui EN/FR per",
+      "statuto): senza un filtro, ogni articolo viene estratto due volte, una",
+      "per lingua, con lo stesso numero — misurato su personal_protection, 55",
+      "numeri su 61 ripetuti nel solo corpo, fino a 4 volte.",
+      "",
+      "foreign_text_marker_pattern riconosce il blocco nell'ALTRA lingua per",
+      "quello che ha di piu' distintivo rispetto all'inglese: i diacritici del",
+      "francese, assenti dall'inglese salvo rari prestiti, piu' una manciata di",
+      "parole funzionali francesi inequivocabili (non condivise con l'inglese).",
+      "Il controllo e' generico — la soglia e il conteggio parole vivono nel",
+      "codice, il pattern (cioe' la conoscenza della lingua) vive qui."
+    ],
+    "foreign_text_marker_pattern": "[àâäéèêëîïôöùûüÿçœæ]|\\b(?:les|des|une|dans|pour|avec|entre|sont|leur|cette|aux|également|conformément|alinéa|ainsi)\\b",
+    "foreign_text_min_marker_ratio": 0.03,
+    "foreign_text_min_words": 6
+  },
+  "detection": {
+    "code": "en",
+    "name": "inglese",
+    "english_name": "English",
+    "confidence": 1.0,
+    "evidence": "Public Law 116–207 An Act To establish minimum security standards for Internet of Things devices",
+    "deterministic_hint": {
+      "scores": {
+        "en": 0.3305,
+        "it": 0.0
+      },
+      "best": "en",
+      "best_score": 0.3305
+    },
+    "signature": {
+      "ocr_sha256": "f520a03f16ff51ad057b60a058007adc47a410fb32b681bbc7f6196f5e913bca",
+      "sample_sha256": "b760f95b6680000366bb7db5be17dc6ffa9657c04d85338446165417b5fb5b85",
+      "model_name": "nvidia/nemotron-3-super",
+      "forced_language": null,
+      "always_generate": false,
+      "schema_version": 1
+    },
+    "structural_coverage": {
+      "part": 0,
+      "title": 0,
+      "chapter": 0,
+      "section": 0,
+      "annex": 0,
+      "article": 4,
+      "recital": 0
+    },
+    "document": "examples/public_law.json",
+    "baselines_available": [
+      "en",
+      "it"
+    ]
+  }
+}

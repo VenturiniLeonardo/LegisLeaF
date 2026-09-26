@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Secrets
+.env
+
+# Pipeline outputs (regenerate with `legisleaf`)
+outputs/
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

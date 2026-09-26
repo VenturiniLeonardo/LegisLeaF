@@ -1,0 +1,258 @@
+{
+  "schema_version": 1,
+  "code": "paper",
+  "name": "inglese (paper scientifici)",
+  "english_name": "English (scientific papers)",
+  "source": "profilo di dominio scritto a mano (corpus HRDoc)",
+  "_commento": [
+    "Profilo di DOMINIO, non di lingua. La lingua e' l'inglese, come language_en.json, ma la",
+    "nomenclatura strutturale e' quella di un articolo scientifico, non di un atto normativo.",
+    "Sta in un file separato proprio per non toccare il profilo inglese legislativo, che resta",
+    "quello tarato sul corpus UK/IE/US.",
+    "",
+    "Si attiva con F0_FORCE_LANGUAGE=paper (f0 trova questa baseline versionata e la copia in",
+    "<OUTPUT_DIR>/language_config.json senza interrogare l'LLM), oppure puntandoci direttamente",
+    "LANGUAGE_CONFIG_PATH e saltando f0.",
+    "",
+    "MAPPATURA. Le etichette della pipeline sono fisse (ALLOWED_LABELS in language/profile.py) e",
+    "i loro livelli pure (AKN_LEVELS: part/annex/recital=1, title=2, chapter=3, section=4,",
+    "article=5): nessuna delle due cose e' configurabile. Le tre sole classi gerarchiche di",
+    "HRDoc vengono quindi mappate sui tre livelli CONSECUTIVI piu' profondi, per PROFONDITA' e",
+    "non per semantica:",
+    "    sec1 -> chapter (livello 3)",
+    "    sec2 -> section (livello 4)",
+    "    sec3 -> article (livello 5)",
+    "Nessuna equivalenza normativa e' implicata: qui 'article' e' uno slot di profondita', non",
+    "l'unita' normativa foglia di language_en.json. Le etichette prodotte su questo corpus si",
+    "riportano, non si punteggiano.",
+    "",
+    "part, title, annex e recital non esistono in questo dominio: i loro pattern sono '(?!)',",
+    "che compila e non matcha mai. Stesso trattamento per l'intera macchina a stati del",
+    "preambolo (considerando, formule di promulgazione, istruzioni modificative, note a pie'",
+    "di pagina numerate) e per i marcatori di comma/lettera: in un paper non esistono, e un",
+    "pattern che matchasse per sbaglio creerebbe nodi che il gold non ha.",
+    "",
+    "DISGIUNZIONE DEI TRE PATTERN ATTIVI. infer_structural_label prova le etichette in",
+    "quest'ordine: annex, article, part, title, chapter, section, recital — e la prima che",
+    "matcha vince. I tre pattern attivi sono percio' disgiunti per costruzione sul numero di",
+    "componenti del numero di sezione: article = N.N.N, section = N.N, chapter = N. Se si",
+    "sovrapponessero, f2 declasserebbe a content ogni intestazione classificata diversamente",
+    "da quella dedotta dal pattern (controllo 'strict_structural_header_failed').",
+    "",
+    "COPERTURA MISURATA sulle 154 intestazioni gold degli 8 documenti HRDoc allineati",
+    "(testo delle righe gold, non blocchi OCR): sec1 73/73, sec2 61/65, sec3 8/16 — in tutto",
+    "142/154. Le 12 mancate sono intestazioni 'a filo di paragrafo' senza numero ('Ethical",
+    "Considerations', 'NYT10.', 'Political blogs.'): senza numero e senza parola chiave non",
+    "sono distinguibili da una riga di testo, e restano contenuto. Falsi positivi: 13 righe",
+    "su 5.726 non-intestazioni (0,2%), quasi tutte elenchi numerati dentro un paragrafo",
+    "('1. Choose topic proportions...') e testatine di rivista ('D. LEMIRE, L. BOYTSOV, N.",
+    "KURZ') — queste ultime vengono poi soppresse da detect_repeated_headings in f2.",
+    "",
+    "Il limite di 70 caratteri sul titolo e il divieto di virgola nel titolo di primo livello",
+    "sono la differenza fra 13 falsi positivi e 76: non sono decorazione."
+  ],
+  "quotes": "“”‘’\"",
+  "article_rubric_max_chars": 160,
+  "numbering": {
+    "_commento": "Le sezioni di un paper si numerano 1 / 2.1 / 6.2.1, le appendici con una lettera (A, A.1). Niente numeri romani: nel corpus HRDoc non compaiono mai.",
+    "roman_or_arabic": "(?:\\d{1,2}(?:\\.\\d{1,2}){0,2}|(?-i:[A-Z])(?:\\.\\d{1,2}){0,2})",
+    "article_number": "(?:\\d{1,2}|(?-i:[A-Z]))\\.\\d{1,2}\\.\\d{1,2}",
+    "word_numerals": []
+  },
+  "ordinal_suffixes": [],
+  "suffix_aliases": {},
+  "akn_patterns": [
+    {
+      "etichetta": "chapter",
+      "pattern": "sezione di primo livello: '1 Introduction', '2. RELATED WORK', 'A Appendix', oppure 'Abstract' / 'References' / 'Acknowledgments' senza numero",
+      "priorita": 3
+    },
+    {
+      "etichetta": "section",
+      "pattern": "sottosezione di secondo livello: '2.1 Encoder', '7.3. Real data', 'A.1 The NYT10 Dataset'",
+      "priorita": 4
+    },
+    {
+      "etichetta": "article",
+      "pattern": "sotto-sottosezione di terzo livello: '2.3.1 Encoder', '6.2.1. SIMD Hybrid Algorithm'",
+      "priorita": 5
+    },
+    {
+      "etichetta": "content",
+      "pattern": "corpo del paper: paragrafi, formule, didascalie di figura e tabella, righe di tabella, titolo, autori, affiliazioni",
+      "priorita": 6
+    },
+    {
+      "etichetta": "noise",
+      "pattern": "numero di pagina nudo, testatina di rivista, pie' di pagina, nota a pie' di pagina",
+      "priorita": 8
+    }
+  ],
+  "akn_document_types": [
+    {
+      "_commento": "Preprint arXiv. Nessun gruppo 'number': l'URI FRBR ripiega sul document_id della run.",
+      "pattern": "\\barxiv\\b|\\bpreprint\\b",
+      "doctype": "doc",
+      "subtype": "preprint",
+      "author_show_as": "Autori dell'articolo",
+      "author_href": "/akn/ontology/organization/unknown"
+    },
+    {
+      "_commento": "Paper di conferenza (ACL Anthology e simili).",
+      "pattern": "\\bproceedings\\b|\\bassociation\\s+for\\s+computational\\s+linguistics\\b|\\bconference\\s+on\\b|\\bworkshop\\s+on\\b",
+      "doctype": "doc",
+      "subtype": "conference-paper",
+      "author_show_as": "Autori dell'articolo",
+      "author_href": "/akn/ontology/organization/unknown"
+    },
+    {
+      "_commento": "Ripiego esplicito: senza questa regola document_type_rules() ricadrebbe sulla baseline della lingua e proverebbe le regole legislative (Public Law, CFR, Act <anno>) sull'incipit di un paper.",
+      "pattern": "^",
+      "doctype": "doc",
+      "subtype": "paper",
+      "author_show_as": "Autori dell'articolo",
+      "author_href": "/akn/ontology/organization/unknown"
+    }
+  ],
+  "header_patterns": {
+    "part": "(?!)",
+    "title": "(?!)",
+    "annex": "(?!)",
+    "recital": "(?!)",
+    "chapter": "^((?:\\d{1,2}|(?-i:[A-Z]))(?!\\.\\d)\\.?(?=\\s+(?-i:[A-Z])(?![^\\n]*,)[^\\n]{1,70}$)|(?:Abstract|References|Bibliography|Acknowledge?ments?)(?=$)){opt_suffix}[^\\n]*$",
+    "section": "^((?:\\d{1,2}|(?-i:[A-Z]))\\.\\d{1,2}(?!\\.\\d)\\.?(?=\\s+(?-i:[A-Z])[^\\n]{1,70}$)){opt_suffix}[^\\n]*$",
+    "article": "^(?:\\d{1,2}|(?-i:[A-Z]))\\.\\d{1,2}\\.\\d{1,2}\\.?(?:\\s+(?P<rubrica>(?-i:[A-Z])[^\\n]{1,{rubric_max}}))?$"
+  },
+  "patterns": {
+    "article_components": "^(?P<prefix>)(?P<number>{article_num})\\.?(?:\\s*{dash}?\\s*(?P<suffix>(?:{suffix})))?\\s*(?P<rubrica>.*)$",
+    "structural_marker": "(?!)",
+    "modificative_instruction": "(?!)",
+    "editorial_structural_note": "(?!)",
+    "paragraph_marker": "(?!)",
+    "point_marker": "(?!)",
+    "page_number_noise": "\\d{1,4}|(?:Page|p\\.)\\s*\\d{1,4}",
+    "recital_item": "(?!)()",
+    "recital_number": "(?!)()()",
+    "recital_path_segment": "(?!)()",
+    "recital_section_start": "(?!)",
+    "device_start": "(?!)",
+    "preamble_marker": "(?!)",
+    "annex_local_part": "(?!)",
+    "footnote_citation_markers": "(?!)"
+  },
+  "label_descriptions": {
+    "part": "non usato in questo dominio: nessun elemento di un paper corrisponde a una parte",
+    "annex": "non usato in questo dominio: le appendici di un paper sono sezioni di primo livello",
+    "title": "non usato in questo dominio",
+    "chapter": "sezione di primo livello del paper: 1 Introduction, 2 Related work, Abstract, References, A Appendix",
+    "section": "sottosezione di secondo livello: 2.1 Encoder, 4.2 Synthetic speech, A.1 The NYT10 Dataset",
+    "article": "sotto-sottosezione di terzo livello: 2.3.1 Encoder, 6.2.1 SIMD Hybrid Algorithm",
+    "recital": "non usato in questo dominio",
+    "paragraph": "non usato in questo dominio: il corpo di un paper non ha commi numerati",
+    "point": "voce di un elenco puntato o numerato interno a una sezione",
+    "content": "testo del paper: paragrafi, formule, didascalie, righe di tabella, titolo, autori, affiliazioni, e-mail",
+    "unresolved": "blocco non classificato in modo affidabile; non deve generare struttura",
+    "noise": "numero di pagina, testatina di rivista, pie' di pagina, nota a pie' di pagina, rumore OCR"
+  },
+  "label_examples": {
+    "part": [],
+    "annex": [],
+    "title": [],
+    "chapter": [
+      "1 Introduction",
+      "2. RELATED WORK",
+      "Abstract",
+      "References",
+      "A Appendix"
+    ],
+    "section": [
+      "2.1 Encoder",
+      "4.2 Synthetic speech",
+      "7.3. Real data",
+      "A.1 The NYT10 Dataset"
+    ],
+    "article": [
+      "2.3.1 Encoder",
+      "6.2.1. SIMD Hybrid Algorithm",
+      "7.3.1. Query logs"
+    ],
+    "recital": [],
+    "paragraph": [],
+    "point": [],
+    "content": [],
+    "noise": []
+  },
+  "prompt_terms": {
+    "hierarchy_glosses": {
+      "chapter": "sezione di primo livello del paper, per esempio 1 Introduction, Abstract, References",
+      "section": "sottosezione di secondo livello, per esempio 2.1 Encoder",
+      "article": "sotto-sottosezione di terzo livello, per esempio 2.3.1 Encoder"
+    },
+    "modificative_examples": [
+      "(nessuna: un paper scientifico non contiene istruzioni modificative)"
+    ],
+    "article_citation_examples": [
+      "as described in Section 3.1",
+      "see Section 2 of Smith et al. (2019)"
+    ],
+    "forbidden_label_synonyms": [
+      "sec1",
+      "sec2",
+      "sec3",
+      "subsection",
+      "paragraph_title",
+      "section_header",
+      "heading",
+      "plain_text",
+      "figure",
+      "table"
+    ]
+  },
+  "display": {
+    "recital_prefix": "Recital",
+    "path_prefix": "Path"
+  },
+  "smoke_queries": {
+    "graph_search": "Introduction",
+    "vector_search": "neural network"
+  },
+  "detection_hints": {
+    "_commento": "Sottoinsieme STRETTO delle stopword di language_en.json. Deliberato: deterministic_language_hint scorre tutte le baseline in config/ e sceglie quella col punteggio piu' alto, a parita' tenendo la prima in ordine alfabetico ('en' precede 'paper'). Con un sottoinsieme il punteggio di 'paper' non puo' mai superare quello di 'en', quindi aggiungere questo file non cambia la controprova sui documenti legislativi gia' in corpus.",
+    "stopwords": [
+      "the",
+      "of",
+      "and",
+      "to",
+      "in",
+      "for",
+      "that",
+      "is",
+      "are",
+      "by",
+      "with",
+      "this"
+    ]
+  },
+  "structure_conventions": {
+    "_commento": [
+      "Il titolo di sezione di un paper sta sulla STESSA riga del numero ('2.1 Encoder'): come",
+      "in italiano, quindi article_rubric_position='after' e detect_rubric_pairs resta disattivo",
+      "(si attiva solo con 'before', la convenzione di common law).",
+      "",
+      "Le soglie di indice e testatina restano quelle di default e servono: i preprint arXiv",
+      "lunghi hanno un indice, e le riviste ripetono l'intestazione in cima a ogni pagina.",
+      "",
+      "foreign_text_marker_pattern resta null: il corpus e' monolingue."
+    ],
+    "article_rubric_position": "after",
+    "article_rubric_max_words": 30,
+    "rubric_block_types": [],
+    "rubric_lookahead_blocks": 3,
+    "contents_page_min_headings": 5,
+    "contents_page_min_ratio": 0.5,
+    "running_header_max_page_order": 2,
+    "running_header_min_pages": 3,
+    "recital_sequence_tolerance": 3,
+    "foreign_text_marker_pattern": null
+  }
+}

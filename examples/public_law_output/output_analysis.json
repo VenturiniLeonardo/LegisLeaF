@@ -1,0 +1,119 @@
+{
+  "mappa_gerarchica": {
+    "part": 1,
+    "annex": 1,
+    "recital": 1,
+    "title": 2,
+    "chapter": 3,
+    "section": 4,
+    "article": 5
+  },
+  "label_rilevanti": [
+    "article",
+    "paragraph",
+    "point",
+    "content",
+    "noise"
+  ],
+  "regole_tipografiche": {
+    "formato_commi": "Numeri arabi tra parentesi tonde, eventualmente seguiti da lettera maiuscola (es. (1), (2), (3A))",
+    "formato_liste": "Lettere maiuscole tra parentesi tonde per i primi livelli (es. (A), (B)), numeri arabi tra parentesi tonde per i sottolivelli (es. (1), (2))"
+  },
+  "pattern_classificazione": [
+    {
+      "etichetta": "part",
+      "pattern": "PART\\s+(?:ONE|TWO|THREE|FOUR|FIVE|SIX|SEVEN|EIGHT|NINE|TEN|(?:[IVXLCDM]+(?:\\.\\d+)?|\\d+[A-Z]{0,3}(?:\\.\\d+)?))",
+      "priorita": 1
+    },
+    {
+      "etichetta": "annex",
+      "pattern": "(?:SCHEDULE|ANNEX|APPENDIX)\\s+(?:(?:[IVXLCDM]+(?:\\.\\d+)?|\\d+[A-Z]{0,3}(?:\\.\\d+)?)|[A-Z]{1,3})",
+      "priorita": 1
+    },
+    {
+      "etichetta": "title",
+      "pattern": "TITLE\\s+(?:[IVXLCDM]+(?:\\.\\d+)?|\\d+[A-Z]{0,3}(?:\\.\\d+)?)",
+      "priorita": 2
+    },
+    {
+      "etichetta": "chapter",
+      "pattern": "CHAPTER\\s+(?:[IVXLCDM]+(?:\\.\\d+)?|\\d+[A-Z]{0,3}(?:\\.\\d+)?)",
+      "priorita": 3
+    },
+    {
+      "etichetta": "section",
+      "pattern": "SUB(?:PART|CHAPTER|DIVISION)\\s+(?:[A-Z]{1,3}|(?:[IVXLCDM]+(?:\\.\\d+)?|\\d+[A-Z]{0,3}(?:\\.\\d+)?))",
+      "priorita": 4
+    },
+    {
+      "etichetta": "article",
+      "pattern": "(?:§|Sec\\.?|Section|Art\\.?|Article)\\s*\\d+[A-Z]{0,3}(?:\\.\\d+)?",
+      "priorita": 5
+    }
+  ],
+  "golden_set": [
+    {
+      "testo_originale": "SEC. 2. SENSE OF CONGRESS.",
+      "etichetta": "article",
+      "ragionamento": "Intestazione autonoma di articolo con formato SEC. seguita dal numero e dal titolo in maiuscolo",
+      "confidenza_attesa": 0.95
+    },
+    {
+      "testo_originale": "SEC. 3. DEFINITIONS.",
+      "etichetta": "article",
+      "ragionamento": "Intestazione autonoma di articolo con formato SEC. seguita dal numero e dal titolo in maiuscolo",
+      "confidenza_attesa": 0.95
+    },
+    {
+      "testo_originale": "SEC. 5. GUIDELINES ON THE DISCLOSURE PROCESS FOR SECURITY VULNERABILITIES RELATING TO INFORMATION SYSTEMS, INCLUDING INTERNET OF THINGS DEVICES.",
+      "etichetta": "article",
+      "ragionamento": "Intestazione autonoma di articolo con formato SEC. seguita dal numero e dal titolo descrittivo in maiuscolo",
+      "confidenza_attesa": 0.95
+    },
+    {
+      "testo_originale": "(1) ensuring the highest level of cybersecurity at agencies in the executive branch is the responsibility of the President, followed by the Director of the Office of Management and Budget, the Secretary of Homeland Security, and the head of each such agency;",
+      "etichetta": "paragraph",
+      "ragionamento": "Comma numerato all'interno di un articolo, formato (1) seguito da testo normativo",
+      "confidenza_attesa": 0.9
+    },
+    {
+      "testo_originale": "(A) have at least one transducer (sensor or actuator) for interacting directly with the physical world, have at least one network interface, and are not conventional Information Technology devices, such as smartphones and laptops, for which the identification and implementation of cybersecurity features is already well understood; and",
+      "etichetta": "point",
+      "ragionamento": "Voce di elenco di primo livello all'interno di un comma, formato (A) seguito da testo normativo",
+      "confidenza_attesa": 0.9
+    },
+    {
+      "testo_originale": "This Act may be cited as the ''Internet of Things Cybersecurity Improvement Act of 2020'' or the ''IoT Cybersecurity Improvement Act of 2020''.",
+      "etichetta": "content",
+      "ragionamento": "Testo normativo ordinario che descrive la citazione dell'atto, non riconosciuto come struttura specifica",
+      "confidenza_attesa": 0.85
+    },
+    {
+      "testo_originale": "Public Law 116–207 116th Congress",
+      "etichetta": "noise",
+      "ragionamento": "Intestazione editoriale con riferimento legislativo e congressuale, non contenuto normativo sostanziale",
+      "confidenza_attesa": 0.9
+    },
+    {
+      "testo_originale": "Be it enacted by the Senate and House of Representatives of the United States of America in Congress assembled,",
+      "etichetta": "content",
+      "ragionamento": "Formula di emanazione normativa, testo ordinario che non corrisponde a una struttura gerarchica specifica",
+      "confidenza_attesa": 0.8
+    }
+  ],
+  "label_non_attestate": [],
+  "cache_signature": {
+    "ocr_sha256": "f520a03f16ff51ad057b60a058007adc47a410fb32b681bbc7f6196f5e913bca",
+    "sample_sha256": "26d91279c6623ccd9b5bc21b56692a3a72f62f1b05f306f9c052222b57dc9390",
+    "prompt_sha256": "6cd8b9af263fb2630b830a920c6e6aba6d688866669789401f7cdd2df779bf03",
+    "regex_sha256": "0729637e8ce7d56cc6376e8340e2912eb623e925bcad750753d299473d95385f",
+    "model_name": "nvidia/nemotron-3-super",
+    "language": {
+      "code": "en",
+      "origin": "f0",
+      "source_path": "outputs/public_law_output/language_config.json",
+      "sha256": "6e7e09ca2bb71ed86f9a2c7fc3fa7be30768630362ac401ff39d24d1984e33e8"
+    },
+    "schema_version": 2
+  }
+}

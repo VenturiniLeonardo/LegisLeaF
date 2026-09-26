@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "legisleaf"
+version = "0.1.0"
+description = "Structure extraction from legal documents: language profiling (F0), block classification (F1), hierarchical tree and Akoma Ntoso export (F2)."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "openai>=1.0",
+    "sentence-transformers>=2.2.2",
+    # Not imported directly: it is the sentence-transformers runtime. Install the
+    # CPU or CUDA build that fits your machine before installing this package.
+    "torch>=2.0",
+    "faiss-cpu>=1.7",
+    "numpy>=1.24",
+    "tqdm>=4.64",
+]
+
+[project.optional-dependencies]
+# Validation of the Akoma Ntoso XML against the official XSD (AKN_XSD_PATH).
+xsd = ["lxml>=4.9"]
+test = ["pytest>=7.0"]
+
+[project.scripts]
+legisleaf = "legisleaf.run:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+legisleaf = ["config/*.json"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]

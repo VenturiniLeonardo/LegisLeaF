@@ -1,0 +1,450 @@
+{
+  "schema_version": 1,
+  "code": "it",
+  "name": "italiano",
+  "english_name": "Italian",
+  "source": "baseline",
+  "_commento": [
+    "Profilo linguistico di riferimento (italiano). Contiene TUTTO cio' che nella",
+    "pipeline dipende dalla lingua del documento: parole chiave strutturali, regex,",
+    "descrizioni delle etichette ed esempi usati nei prompt.",
+    "",
+    "Nei pattern sono ammessi i segnaposto seguenti, espansi da",
+    "legisleaf/language/profile.py:",
+    "  {num}          numero romano o arabo",
+    "  {article_num}  numero di articolo (solo arabo)",
+    "  {part_number}  numerali a parola della lingua, in alternativa a {num}",
+    "  {suffix}       alternanza dei suffissi ordinali, dal piu' lungo al piu' corto",
+    "  {opt_suffix}   gruppo opzionale di cattura del suffisso, preceduto da trattino",
+    "  {dash}         classe dei trattini tipografici",
+    "  {quotes}       classe delle virgolette legislative (gia' escapata)",
+    "  {rubric_max}   lunghezza massima della rubrica di un articolo",
+    "Le graffe che non corrispondono a un segnaposto noto (quantificatori come",
+    "{1,4}) restano letterali: non vanno raddoppiate."
+  ],
+  "quotes": "«»“”\"",
+  "article_rubric_max_chars": 160,
+  "numbering": {
+    "roman_or_arabic": "(?:[IVXLCDM]+(?:\\.\\d+)?|\\d+(?:\\.\\d+)?)",
+    "article_number": "\\d+(?:\\.\\d+)?",
+    "word_numerals": [
+      "PRIMA",
+      "SECONDA",
+      "TERZA",
+      "QUARTA",
+      "QUINTA"
+    ]
+  },
+  "ordinal_suffixes": [
+    "semel",
+    "bis",
+    "ter",
+    "quater",
+    "quinquies",
+    "sexies",
+    "septies",
+    "octies",
+    "nonies",
+    "novies",
+    "decies",
+    "undecies",
+    "duodecies",
+    "terdecies",
+    "quaterdecies",
+    "quinquiesdecies",
+    "sexiesdecies",
+    "septiesdecies",
+    "octiesdecies",
+    "noviesdecies",
+    "undevicies",
+    "duodevicies",
+    "vicies"
+  ],
+  "suffix_aliases": {
+    "novies": "nonies",
+    "octiesdecies": "duodevicies",
+    "noviesdecies": "undevicies"
+  },
+  "akn_patterns": [
+    {
+      "etichetta": "part",
+      "pattern": "PARTE\\s+{part_number}(?:\\s*[-]?\\s*(?:{suffix}))?",
+      "priorita": 1
+    },
+    {
+      "etichetta": "annex",
+      "pattern": "ALLEGATO\\s+{num}(?:\\s*[-]?\\s*(?:{suffix})(?:\\s+(?:{suffix}))?)?",
+      "priorita": 1
+    },
+    {
+      "etichetta": "recital",
+      "pattern": "(?:CONSIDERANDO\\s+\\(?\\d+\\)?|\\(\\d+\\)\\s+)",
+      "priorita": 1
+    },
+    {
+      "etichetta": "title",
+      "pattern": "TITOLO\\s+{num}(?:\\s*[-]?\\s*(?:{suffix}))?",
+      "priorita": 2
+    },
+    {
+      "etichetta": "chapter",
+      "pattern": "CAPO\\s+{num}(?:\\s*[-]?\\s*(?:{suffix}))?",
+      "priorita": 3
+    },
+    {
+      "etichetta": "section",
+      "pattern": "SEZIONE\\s+{num}(?:\\s*[-]?\\s*(?:{suffix}))?",
+      "priorita": 4
+    },
+    {
+      "etichetta": "article",
+      "pattern": "(?:Art\\.?|Articolo)\\s*\\d+(?:\\s*[-]?\\s*(?:{suffix}))?(?:[\\.,]|\\b)(?:\\s+[^\\n]{1,{rubric_max}})?$",
+      "priorita": 5
+    },
+    {
+      "etichetta": "paragraph",
+      "pattern": "\\d+[\\w\\-]*\\.\\s+",
+      "priorita": 6
+    },
+    {
+      "etichetta": "point",
+      "pattern": "(?:[a-z]|[0-9]+)\\)\\s+",
+      "priorita": 7
+    },
+    {
+      "etichetta": "noise",
+      "pattern": "(?:GAZZETTA|REPUBBLICA ITALIANA|SERIE GENERALE|Anno\\s+\\d+|Pag\\.\\s*\\d+|^\\d+\\s*$)",
+      "priorita": 8
+    }
+  ],
+  "akn_document_types": [
+    {
+      "_commento": "Regolamento UE: 'REGOLAMENTO (UE) 2024/1689 DEL PARLAMENTO EUROPEO E DEL CONSIGLIO'",
+      "pattern": "\\bregolamento\\s*\\(\\s*(?:ue|eu|ce)[^)]*\\)\\s*(?:n\\.?\\s*)?(?P<number>\\d{1,4}/\\d{1,5}|\\d{1,5}/\\d{4})",
+      "subtype": "regolamento",
+      "country": "eu",
+      "author_show_as": "Parlamento europeo e Consiglio dell'Unione europea",
+      "author_href": "/akn/ontology/organization/eu.europarl-consilium"
+    },
+    {
+      "_commento": "Direttiva UE: 'DIRETTIVA (UE) 2022/2555'",
+      "pattern": "\\bdirettiva\\s*(?:\\(\\s*(?:ue|eu|ce)[^)]*\\)\\s*)?(?:n\\.?\\s*)?(?P<number>\\d{1,4}/\\d{1,5}|\\d{1,5}/\\d{4})",
+      "subtype": "direttiva",
+      "country": "eu",
+      "author_show_as": "Parlamento europeo e Consiglio dell'Unione europea",
+      "author_href": "/akn/ontology/organization/eu.europarl-consilium"
+    },
+    {
+      "_commento": "Decreto legislativo: 'DECRETO LEGISLATIVO 31 marzo 2023, n. 36'",
+      "pattern": "\\bdecreto\\s+legislativo\\b(?:[^\\n]*?\\bn\\.?\\s*(?P<number>\\d{1,4}))?",
+      "subtype": "decreto-legislativo",
+      "country": "it",
+      "author_show_as": "Presidente della Repubblica",
+      "author_href": "/akn/ontology/organization/it.presidente-repubblica"
+    },
+    {
+      "_commento": "Decreto-legge: 'DECRETO-LEGGE 2 marzo 2024, n. 19'",
+      "pattern": "\\bdecreto[\\s-]+legge\\b(?:[^\\n]*?\\bn\\.?\\s*(?P<number>\\d{1,4}))?",
+      "subtype": "decreto-legge",
+      "country": "it",
+      "author_show_as": "Presidente della Repubblica",
+      "author_href": "/akn/ontology/organization/it.presidente-repubblica"
+    },
+    {
+      "_commento": "Decreto del Presidente della Repubblica",
+      "pattern": "\\bdecreto\\s+del\\s+presidente\\s+della\\s+repubblica\\b(?:[^\\n]*?\\bn\\.?\\s*(?P<number>\\d{1,4}))?",
+      "subtype": "dpr",
+      "country": "it",
+      "author_show_as": "Presidente della Repubblica",
+      "author_href": "/akn/ontology/organization/it.presidente-repubblica"
+    },
+    {
+      "_commento": "Costituzione della Repubblica italiana",
+      "pattern": "\\bcostituzione\\s+della\\s+repubblica\\s+italiana\\b",
+      "subtype": "costituzione",
+      "country": "it",
+      "author_show_as": "Assemblea costituente",
+      "author_href": "/akn/ontology/organization/it.assemblea-costituente"
+    },
+    {
+      "_commento": "Legge ordinaria: 'LEGGE 5 agosto 2022, n. 118'",
+      "pattern": "\\blegge\\s+(?:\\d{1,2}\\s+\\w+\\s+\\d{4}\\s*,?\\s*)?n\\.?\\s*(?P<number>\\d{1,4})",
+      "subtype": "legge",
+      "country": "it",
+      "author_show_as": "Parlamento italiano",
+      "author_href": "/akn/ontology/organization/it.parlamento"
+    },
+    {
+      "_commento": "Testo unico o codice: nessun numero proprio, l'atto istitutivo e' un altro",
+      "pattern": "^\\s*(?:codice\\b|testo\\s+unico\\b)",
+      "subtype": "codice",
+      "country": "it"
+    }
+  ],
+  "header_patterns": {
+    "part": "^Parte\\s+({part_number}){opt_suffix}\\b",
+    "title": "^Titolo\\s+({num}){opt_suffix}\\b",
+    "chapter": "^Capo\\s+({num}){opt_suffix}\\b",
+    "section": "^Sezione\\s+({num}){opt_suffix}\\b",
+    "annex": "^Allegato\\s+({num}){opt_suffix}(?:\\b|[.\\s(]).*$",
+    "article": "^(?:Art\\.?|Articolo)\\s*({article_num}){opt_suffix}(?:\\b|[.,])(?:\\s+(?P<rubrica>[^\\n]{1,{rubric_max}}))?$",
+    "recital": "^(?:considerando\\s+\\(?\\d+\\)?|\\(\\d+\\)\\s+).+"
+  },
+  "patterns": {
+    "article_components": "^(?P<prefix>Art\\.?|Articolo)\\s*(?P<number>{article_num})(?:\\s*{dash}?\\s*(?P<suffix>(?:{suffix})(?:[\\s-]+(?:{suffix}))?))?(?:[.,])?\\s*(?P<rubrica>.*)$",
+    "structural_marker": "[{quotes}]?\\b(?:Parte|Titolo|Capo|Sezione|Allegato)\\s+{num}(?:\\s*{dash}?\\s*(?:{suffix})(?:\\s+(?:{suffix}))?)?|[{quotes}]?\\b(?:Art\\.?|Articolo)\\s*\\d+(?:\\s*{dash}?\\s*(?:{suffix}))?",
+    "modificative_instruction": "\\b(?:e'|è|sono|viene|vengono)\\s+(?:inserit[ioaie]*|aggiunt[ioaie]*|sostituit[ioaie]*|introdott[ioaie]*)\\b.*\\b(?:capo|sezione|articol[oi]|titolo|allegat[oi])\\b.*\\bseguent[ei]\\b",
+    "editorial_structural_note": "^\\(\\d+\\)\\s+(?:Articolo|Art\\.?|Allegato|Capo|Titolo|Sezione)\\s+(?:cosi|così|sostituito|inserito|aggiunto|abrogato|modificato|rettificato)",
+    "paragraph_marker": "\\d+[\\w\\-]*\\.\\s+",
+    "point_marker": "(?:[a-z]|[0-9]+)\\)\\s+",
+    "page_number_noise": "\\d{1,4}|Pag\\.?\\s*\\d{1,4}",
+    "recital_item": "^\\((\\d+)\\)\\s+\\S",
+    "recital_number": "^(?:considerando\\s+\\(?(\\d+)\\)?|\\((\\d+)\\)\\s+)",
+    "recital_path_segment": "^\\((\\d+)\\)",
+    "recital_section_start": "^considerando\\s+quanto\\s+segue\\b",
+    "device_start": "^(?:ha\\s+adottato\\s+il\\s+presente|adotta\\s+il\\s+presente|art(?:icolo|\\.)\\s+\\d+)\\b",
+    "preamble_marker": "^(?:visto|vista|visti|viste|deliberando|considerando\\s+quanto\\s+segue)\\b",
+    "annex_local_part": "^Parte\\s+\\d+\\s*:?$",
+    "footnote_citation_markers": "\\b(?:GU|Gazzetta ufficiale|pag\\.|regolamento|direttiva|decisione|parere)\\b"
+  },
+  "label_descriptions": {
+    "part": "partizione alta del testo, di solito PARTE PRIMA/SECONDA",
+    "annex": "allegato del documento, per esempio Allegato I oppure Allegato II-bis",
+    "title": "partizione Akoma Ntoso title, di solito TITOLO I/II",
+    "chapter": "partizione Akoma Ntoso chapter, equivalente al CAPO italiano",
+    "section": "partizione Akoma Ntoso section, equivalente a SEZIONE",
+    "recital": "considerando o recital autonomo del preambolo, per esempio (1) oppure Considerando 1",
+    "article": "intestazione autonoma di articolo, per esempio Art. 1., Articolo 1 oppure Art. 5-ter.",
+    "paragraph": "comma numerato dentro un articolo, per esempio 1. oppure 1-bis.",
+    "point": "lettera o punto di elenco, per esempio a), b), 1)",
+    "content": "testo normativo ordinario non riconosciuto come struttura o lista",
+    "unresolved": "blocco non classificato in modo affidabile; non deve generare struttura",
+    "noise": "testo editoriale, numeri pagina, intestazioni OCR, elementi non normativi"
+  },
+  "label_examples": {
+    "part": [
+      "PARTE PRIMA",
+      "PARTE SECONDA"
+    ],
+    "annex": [
+      "Allegato I",
+      "Allegato II-bis",
+      "Allegato II ter"
+    ],
+    "title": [
+      "TITOLO I",
+      "TITOLO II"
+    ],
+    "chapter": [
+      "CAPO IV",
+      "CAPO 4"
+    ],
+    "section": [
+      "SEZIONE I",
+      "SEZIONE 1"
+    ],
+    "recital": [
+      "(1)",
+      "Considerando 1"
+    ],
+    "article": [
+      "Articolo 1",
+      "Articolo 5 bis",
+      "Art. 1",
+      "Art. 5-ter",
+      "Art. 1. Titolo dell'articolo"
+    ],
+    "paragraph": [
+      "1.",
+      "2.",
+      "1-bis."
+    ],
+    "point": [
+      "a)",
+      "b)",
+      "1)"
+    ],
+    "content": [],
+    "noise": []
+  },
+  "prompt_terms": {
+    "hierarchy_glosses": {
+      "part": "partizione alta, per esempio PARTE PRIMA",
+      "annex": "allegato del documento, per esempio ALLEGATO I o ALLEGATO II-bis",
+      "title": "titolo normativo, per esempio TITOLO I",
+      "chapter": "capo italiano, modellato come chapter Akoma Ntoso",
+      "section": "sezione italiana, modellata come section Akoma Ntoso",
+      "article": "intestazione autonoma di articolo, anche quando include il titolo dopo il numero"
+    },
+    "modificative_examples": [
+      "e' inserito il capo seguente",
+      "è inserita la sezione seguente",
+      "sono inseriti gli articoli seguenti"
+    ],
+    "article_citation_examples": [
+      "1. Dopo l'articolo...",
+      "«Art. 218-ter ... — 1."
+    ],
+    "forbidden_label_synonyms": [
+      "parte",
+      "titolo",
+      "capo",
+      "sezione",
+      "articolo",
+      "comma",
+      "lettera_lista",
+      "testo_semplice",
+      "rumore"
+    ]
+  },
+  "display": {
+    "recital_prefix": "Considerando",
+    "path_prefix": "Percorso"
+  },
+  "smoke_queries": {
+    "graph_search": "Art. 1",
+    "vector_search": "patente"
+  },
+  "detection_hints": {
+    "stopwords": [
+      "il",
+      "lo",
+      "la",
+      "gli",
+      "le",
+      "dei",
+      "delle",
+      "degli",
+      "che",
+      "non",
+      "con",
+      "per",
+      "sono",
+      "dalla",
+      "nella",
+      "presente",
+      "articolo",
+      "comma",
+      "disposizioni",
+      "ai sensi",
+      "qualora"
+    ],
+    "content_stopwords": [
+      "a",
+      "agli",
+      "ai",
+      "al",
+      "alla",
+      "alle",
+      "allo",
+      "anche",
+      "articolo",
+      "che",
+      "chi",
+      "ci",
+      "cioe",
+      "come",
+      "comma",
+      "con",
+      "cui",
+      "da",
+      "dagli",
+      "dai",
+      "dal",
+      "dalla",
+      "dalle",
+      "dallo",
+      "degli",
+      "dei",
+      "del",
+      "della",
+      "delle",
+      "dello",
+      "deve",
+      "devono",
+      "di",
+      "disposizioni",
+      "dove",
+      "e",
+      "e'",
+      "ed",
+      "essere",
+      "fra",
+      "gli",
+      "ha",
+      "hanno",
+      "i",
+      "il",
+      "in",
+      "la",
+      "le",
+      "lo",
+      "loro",
+      "ma",
+      "ne",
+      "negli",
+      "nei",
+      "nel",
+      "nella",
+      "nelle",
+      "nello",
+      "non",
+      "o",
+      "od",
+      "ogni",
+      "per",
+      "piu",
+      "presente",
+      "puo",
+      "quale",
+      "quali",
+      "qualora",
+      "quando",
+      "questa",
+      "queste",
+      "questi",
+      "questo",
+      "se",
+      "si",
+      "sono",
+      "su",
+      "sua",
+      "sue",
+      "sugli",
+      "sui",
+      "sul",
+      "sulla",
+      "sulle",
+      "sullo",
+      "suo",
+      "suoi",
+      "tra",
+      "tutta",
+      "tutte",
+      "tutti",
+      "tutto",
+      "un",
+      "una",
+      "uno",
+      "vi"
+    ]
+  },
+  "structure_conventions": {
+    "_commento": [
+      "Convenzioni tipografiche della redazione italiana. I valori riproducono",
+      "esattamente il comportamento che f2 aveva quando erano costanti nel codice.",
+      "article_rubric_position='after': numero e rubrica stanno sulla stessa riga",
+      "('Art. 5 Definizioni'), e quando l'OCR le separa la rubrica e' il blocco",
+      "breve che SEGUE l'intestazione."
+    ],
+    "article_rubric_position": "after",
+    "article_rubric_max_words": 30,
+    "rubric_block_types": [],
+    "rubric_lookahead_blocks": 3,
+    "contents_page_min_headings": 5,
+    "contents_page_min_ratio": 0.5,
+    "running_header_max_page_order": 2,
+    "running_header_min_pages": 3,
+    "recital_sequence_tolerance": 3
+  }
+}
