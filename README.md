@@ -84,6 +84,7 @@ LegisLeaF/
 ├── examples/
 │   ├── public_law.json           # sample input (US Public Law 116-207, 7 pages)
 │   └── public_law_output/        # its F0/F1 outputs, to run F2 offline
+├── LICENSE.md
 ├── pyproject.toml
 ├── .env.example
 └── README.md
@@ -298,12 +299,17 @@ It does not call any model.
 
 ## Citation
 
-LegisLeaF was developed as part of a master's thesis by Leonardo Venturini
-(working title: *Dal PDF normativo ad Akoma Ntoso: estrazione strutturale
-linguaggio-agnostica e validazione della struttura di un GraphRAG giuridico*,
-2026). No published citation or DOI exists yet. The author will add one here.
+LegisLeaF was developed as part of a master's thesis by Leonardo Venturini:
+
+> *LegisLeaF: Reconstructing the Logical Structure of Legal Documents from Flat
+> Extractions. A Profile-Driven Framework and Its Structural Evaluation.*
+> Master's thesis, 2026.
+
+No DOI exists yet.
 
 ## License
 
-No license has been chosen yet. Until the owner adds one, the default copyright
-applies and others may not reuse the code.
+LegisLeaF is released under the
+[PolyForm Noncommercial License 1.0.0](LICENSE.md): it is free for research,
+educational and other non-commercial use. Commercial use requires a separate
+license from the author.

@@ -7,6 +7,8 @@ name = "legisleaf"
 version = "0.1.0"
 description = "Structure extraction from legal documents: language profiling (F0), block classification (F1), hierarchical tree and Akoma Ntoso export (F2)."
 readme = "README.md"
+license = { file = "LICENSE.md" }
+authors = [{ name = "Leonardo Venturini" }]
 requires-python = ">=3.10"
 dependencies = [
     "openai>=1.0",
