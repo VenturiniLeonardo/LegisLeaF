@@ -84,7 +84,7 @@ LegisLeaF/
 ├── examples/
 │   ├── public_law.json           # sample input (US Public Law 116-207, 7 pages)
 │   └── public_law_output/        # its F0/F1 outputs, to run F2 offline
-├── LICENSE.md
+├── LICENSE
 ├── pyproject.toml
 ├── .env.example
 └── README.md
@@ -310,6 +310,4 @@ No DOI exists yet.
 ## License
 
 LegisLeaF is released under the
-[PolyForm Noncommercial License 1.0.0](LICENSE.md): it is free for research,
-educational and other non-commercial use. Commercial use requires a separate
-license from the author.
+[GNU Affero General Public License v3.0](LICENSE) (AGPL-3.0).
